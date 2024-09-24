@@ -11,7 +11,7 @@ from langchain_core.messages import AIMessage
 from langchain_chroma import Chroma
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_ollama import ChatOllama
-from langchain_experimental.llms.ollama_functions import OllamaFunctions
+# from langchain_experimental.llms.ollama_functions import OllamaFunctions
 from langchain.prompts import PromptTemplate
 from opentelemetry.sdk import trace as trace_sdk
 from opentelemetry.sdk.trace.export import ConsoleSpanExporter, SimpleSpanProcessor
