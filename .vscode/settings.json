@@ -1,0 +1,4 @@
+{
+  "python.createEnvironment.contentButton": "show",
+  "python.defaultInterpreterPath": ".venv/bin/python"
+}
