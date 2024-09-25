@@ -72,17 +72,15 @@ def get_llm(model_name = None, tools = False) :
 def get_conversational_rag_chain():
     
     prompt = PromptTemplate(
-    template="""You have access to a set of documents and tools that provide detailed information on various topics. When answering the user's question, please follow these steps:
-    1. Retrieve and summarize relevant content from the DOCUMENTS: If any information is available within the documents that directly addresses the user's question, extract and use the that to answer user's question.
-    2. Leverage available tools for additional insights: If tools are provided, such as get current weather, or get child's age functionalities, utilize them to enhance the response. If further clarification is needed from outside sources, mention the tool used and the insight gained.
-    3. Provide context and reasoning: Explain how the retrieved information or tool-generated insights directly relate to the user's query. If multiple pieces of information are relevant, synthesize them into a coherent response.
-    If you don't know the answer, just state that you don't know.
-    Question: {question} 
-    Documents: {documents} 
-    Answer: 
+    template="""You are an assistant specializing in question-answering tasks. 
+    Your expertise lies in understanding user requests and providing accurate answers based on the DOCUMENTS provided. 
+    While you have access to additional tools for further details, use them only when absolutely necessary. 
+    If the information is not available, simply state that you do not know.
+    USER REQUEST:\n\n {question} \n\n
+    DOCUMENTS:\n\n {documents}\n\n
     """,
     input_variables=["question", "documents"],
-    )
+    ) 
 
     llm  = get_llm(tools=True)
 
@@ -92,12 +90,11 @@ def get_conversational_rag_chain():
 
 def get_conversational_rag_and_tool_chain():
     
+
     prompt = PromptTemplate(
-    template="""You have received responses from various tools that provide insights and data relevant to the user's query. Your task is to use these tool-generated responses and docuement to create a final, cohesive answer.
-    1. Synthesize information: Combine the data and insights from the tool responses and document into a single, coherent answer. Ensure that all relevant points are included.
-    2. Provide clarity and structure: Organize the final answer logically. Begin with a brief introduction or overview, followed by detailed explanations, and conclude with actionable recommendations or summaries where appropriate.
-    3. Address any inconsistencies: If the tool responses provide differing or conflicting insights, clarify the reason for any discrepancies and provide the most likely interpretation or recommendation.
-    4. Contextualize for the user: Tailor the response to ensure it directly answers the user's original question and provides meaningful, practical value.        
+    template="""You are an assistant specializing in question-answering tasks. 
+    Use the TOOL RESPONSE and DOCUMENTS provided to answer the QUESTION. 
+    If the information is not available, simply state that you do not know. 
     QUESTION: {question} 
     TOOL RESPONSE: {tool_output}
     DOCUMENTS: {documents}
