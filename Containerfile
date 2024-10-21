@@ -1,4 +1,4 @@
-FROM registry.redhat.io/ubi9/python-39
+FROM registry.redhat.io/ubi9/python-312
 ADD . .
 RUN python -m pip install -r requirements.txt
 EXPOSE 8501

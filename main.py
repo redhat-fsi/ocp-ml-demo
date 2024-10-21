@@ -4,11 +4,13 @@ from magic import Magic
 from PIL import Image
 import pdfplumber
 from pytesseract import pytesseract 
-from docx.api import Document 
+from docx.api import Document as DocxDocument
+from langchain_core.documents import Document
 from tools import get_current_weather, get_childs_age, get_personal_detail
 from langchain_core.messages import AIMessage
 
 from langchain_chroma import Chroma
+from langchain_postgres.vectorstores import PGVector
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_ollama import ChatOllama
 # from langchain_experimental.llms.ollama_functions import OllamaFunctions
@@ -389,7 +391,7 @@ def predict_custom_agent_answer(question):
 
 def extract_doc_text(doc):
     text = ""
-    doc_reader = Document(doc)
+    doc_reader = DocxDocument(doc)
     for para in doc_reader.paragraphs:
         text += para.text
     return text
@@ -453,8 +455,8 @@ def get_unique_id():
     return st.experimental_user.email
 
 def get_retriever():
-    new_db = load_chroma_db()
-    return new_db.as_retriever(search_kwargs = {"k" : int(get_config_prop("K_VALUE_RETREIVER_COUNT", 1))})
+    new_db = load_vector_db()
+    return new_db.as_retriever(search_type="mmr", search_kwargs = {"k" : int(get_config_prop("K_VALUE_RETREIVER_COUNT", 1))})
     # return new_db.as_retriever(search_type="similarity_score_threshold", search_kwargs={"score_threshold": 0.5})
 
 def save_to_chroma_vector_store(text_chunks):
@@ -465,11 +467,46 @@ def save_to_chroma_vector_store(text_chunks):
                         embedding=embeddings,
                         persist_directory=get_config_prop("CHROMA_DB_DIR_NAME", "db"))    
 
+def get_pg_connection_str():
+    user = get_config_prop("PGVECTOR_CONNECTION_USER", "rhnasa")
+    password = get_config_prop("PGVECTOR_CONNECTION_PASSWORD", "rhnasa123")
+    host = get_config_prop("PGVECTOR_CONNECTION_HOST", "localhost")
+    port = get_config_prop("PGVECTOR_CONNECTION_PORT", "6024")
+    dbname = get_config_prop("PGVECTOR_CONNECTION_DBNAME", "rhnasademo")
+
+    return f"postgresql+psycopg2://{user}:{password}@{host}:{port}/{dbname}"
+
+def save_to_vector_store(text_chunks):
+    
+    embeddings = get_nomic_embedding()
+    documents = [Document(page_content=text) for text in text_chunks]
+   
+    PGVector.from_documents(
+            embedding=embeddings,
+            documents=documents,
+            collection_name=get_config_prop("PGVECTOR_COLLECTION_NAME", "rhnafsidemo"),
+            connection= get_pg_connection_str(),
+            use_jsonb=True                    
+    )
+
+
 def load_chroma_db():
     
     embeddings = get_nomic_embedding()
     
     return Chroma(persist_directory=get_config_prop("CHROMA_DB_DIR_NAME", "db"), embedding_function=embeddings)
+
+
+def load_vector_db():
+    
+    embeddings = get_nomic_embedding()
+    
+    return PGVector(
+        embeddings=embeddings,
+        collection_name=get_config_prop("PGVECTOR_CONNECTION", "rhnafsidemo"),
+        connection=get_pg_connection_str(),
+        use_jsonb=True,
+    )
 
 def user_input(user_question):
     response = predict_custom_agent_answer(user_question)
@@ -533,7 +570,7 @@ def main():
             with st.spinner("Processing..."):
                 raw_text = get_extracted_text(docs)
                 text_chunks = get_text_chunks(raw_text)
-                save_to_chroma_vector_store(text_chunks)
+                save_to_vector_store(text_chunks)
                 st.success("Done")
 
             

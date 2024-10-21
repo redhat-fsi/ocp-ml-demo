@@ -18,8 +18,14 @@ To handle images we need tesseract for Ubuntu install it using following command
 
 sudo apt install tesseract-ocr
 
+For Chroma
+
 To handle error while building new chroma package
 sudo apt-get install build-essential
 sudo apt-get install python3-dev
 sudo apt-get install libssl-dev
 sudo apt-get install g++
+
+For PGVector
+
+podman run --name pgvector-container -e POSTGRES_USER=rhnasa -e POSTGRES_PASSWORD=rhnasa123 -e POSTGRES_DB=rhnasademo -p 6024:5432 -d docker.io/pgvector/pgvector:pg17
