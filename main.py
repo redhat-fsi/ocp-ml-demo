@@ -9,7 +9,7 @@ from langchain_core.documents import Document
 from tools import get_current_weather, get_childs_age, get_personal_detail
 from langchain_core.messages import AIMessage
 
-from langchain_chroma import Chroma
+# from langchain_chroma import Chroma
 from langchain_postgres.vectorstores import PGVector
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_ollama import ChatOllama
@@ -459,13 +459,13 @@ def get_retriever():
     return new_db.as_retriever(search_type="mmr", search_kwargs = {"k" : int(get_config_prop("K_VALUE_RETREIVER_COUNT", 1))})
     # return new_db.as_retriever(search_type="similarity_score_threshold", search_kwargs={"score_threshold": 0.5})
 
-def save_to_chroma_vector_store(text_chunks):
+# def save_to_chroma_vector_store(text_chunks):
     
-    embeddings = get_nomic_embedding()    
+#     embeddings = get_nomic_embedding()    
 
-    Chroma.from_texts(texts=text_chunks,
-                        embedding=embeddings,
-                        persist_directory=get_config_prop("CHROMA_DB_DIR_NAME", "db"))    
+#     Chroma.from_texts(texts=text_chunks,
+#                         embedding=embeddings,
+#                         persist_directory=get_config_prop("CHROMA_DB_DIR_NAME", "db"))    
 
 def get_pg_connection_str():
     user = get_config_prop("PGVECTOR_CONNECTION_USER", "rhnasa")
@@ -490,11 +490,11 @@ def save_to_vector_store(text_chunks):
     )
 
 
-def load_chroma_db():
+# def load_chroma_db():
     
-    embeddings = get_nomic_embedding()
+#     embeddings = get_nomic_embedding()
     
-    return Chroma(persist_directory=get_config_prop("CHROMA_DB_DIR_NAME", "db"), embedding_function=embeddings)
+#     return Chroma(persist_directory=get_config_prop("CHROMA_DB_DIR_NAME", "db"), embedding_function=embeddings)
 
 
 def load_vector_db():
